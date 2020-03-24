@@ -1,0 +1,107 @@
+CREATE TABLE preguntas (
+  id mediumint(8) unsigned NOT NULL default '0',
+  pregunta text,
+  correcta text,
+  incorrecta1 text,
+  incorrecta2 text,
+  incorrecta3 text,
+  PRIMARY KEY  (id)
+) TYPE=MyISAM;
+<? 
+session_start();
+// conexion db
+?>
+<style>
+* {font-size:10px}
+</style>
+<br>
+<form action="resultados.php" method="post"><?
+// sacamos X preguntas al hazar
+$hacer_trampa=1;  // 1 hacer trampa 0 no hacer trampa
+$numero_de_preguntas=10;  //numero de preguntas que se sacarán al hazar
+$sql="SELECT * FROM preguntas ORDER BY RAND() LIMIT $numero_de_preguntas";
+if ($sql=mysql_query($sql))
+{
+	$a=0;
+	while($assoc=mysql_fetch_assoc($sql))
+	{
+		$pregunta[]=$assoc['pregunta'];
+		$respuesta[$a][0]=$assoc['correcta'];
+		$respuesta[$a][1]=$assoc['incorrecta1'];
+		$respuesta[$a][2]=$assoc['incorrecta2'];
+		$respuesta[$a][3]=$assoc['incorrecta3'];
+		$_SESSION['id_pregunta'][$a]=$assoc['id'];
+		$a++;
+	}	
+	mysql_free_result($sql);
+	foreach($pregunta as $indice=>$valor)
+	{
+		// Mezclamos y sacamos nuevo id de correcta 
+		$arrayAleatorio = range(0, 3);
+		shuffle($arrayAleatorio);
+		$nuevoIdCorrecta=array_search("0",$arrayAleatorio);
+		$_SESSION['array'][$indice]=$arrayAleatorio;
+		print "<b>$valor</b><br>\n";
+		foreach($arrayAleatorio as $indice1=>$valor1)
+			print "<input type=\"radio\" name=\"Pregunta".$indice."\" value=\"".$valor1."\"  />". $respuesta[$indice][$arrayAleatorio[$valor1]] . ( ( $valor1 == $nuevoIdCorrecta && $hacer_trampa) ? " correcta" : "" ) . "<br />\n";
+	}
+}?>
+<INPUT TYPE="submit" name="respuestas" value="Respuestas">
+<? 
+session_start();
+// conexion db
+?>
+<style>
+* {font-size:12px}
+.acierto{border:2px solid #336699;background:#eeeeff;text-align:center}
+.fallo{border:2px solid #996633;background:#ffeeee;text-align:center}
+.acierto1{background:#eeeeff;text-align:center}
+.fallo1{background:#ffeeee;text-align:center}
+.pregunta{background:#eeffee;text-align:center}
+</style>
+<table border="1" align="center" width="100%">
+<tr>
+<th>Pregunta</th>
+<th>Correcta</th>
+<th>Incorrecta1</th>
+<th>Incorrecta2</th>
+<th>Incorrecta3</th>
+</tr><?
+if (is_array($_SESSION['id_pregunta']))
+foreach ($_SESSION['id_pregunta'] as $key=>$value)
+{
+		$sql="SELECT * FROM preguntas WHERE id=".$value;
+		if ($sql=mysql_query($sql))
+		{?><tr><?
+			$assoc=mysql_fetch_assoc($sql);
+			$envio=$_SESSION['array'][$key];
+			$correcta=array_search("0",$envio);
+			$value1=$_POST['Pregunta'.$key];
+			print "<td class=\"pregunta\"><b><tt>".$assoc['pregunta']."</b></tt></td>\n";
+			print "<td".( ( array_search("0",$envio) == $value1 && $value1!="") ? " class=\"acierto\"" : " class=\"acierto1\"" )."><tt>".$assoc['correcta']. "</tt></td>\n";
+			print "<td".( ( array_search("1",$envio) == $value1 && $value1!="" ) ? " class=\"fallo\"" : " class=\"fallo1\"" )."><tt>".$assoc['incorrecta1']. "</tt></td>\n";
+			print "<td".( ( array_search("2",$envio) == $value1 && $value1!="" ) ? " class=\"fallo\"" : " class=\"fallo1\"" )."><tt>".$assoc['incorrecta2']. "</tt></td>\n";
+			print "<td".( ( array_search("3",$envio) == $value1 && $value1!="" ) ? " class=\"fallo\"" : " class=\"fallo1\"" )."><tt>".$assoc['incorrecta3']. "</tt></td>\n";
+?></tr><?
+
+	
+	}
+
+}
+
+session_destroy();
+?>	</table>
+<br><br>
+<table border="1" align="center" width="50%">
+<tr>
+<td class="acierto">&nbsp;&nbsp;</td><td>Respuesta enviada y acertada</td>
+</tr>
+<tr>
+<td class="fallo">&nbsp;&nbsp;</td><td>Respuesta enviada y fallada</td>
+</tr>
+<td class="acierto1">&nbsp;&nbsp;</td><td>Respuesta correcta</td>
+</tr>
+<tr>
+<td class="fallo1">&nbsp;&nbsp;</td><td>Respuesta incorrecta</td>
+</tr>
+</table>
