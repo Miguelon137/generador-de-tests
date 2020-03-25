@@ -15,7 +15,7 @@
           $opcio1 = $_POST['opcio1'];
           $opcio2 = $_POST['opcio2'];
           $opcio3 = $_POST['opcio3'];
-          $stm = $db-> prepare("INSERT INTO jornadas(jornada, opcio1, opcio2, opcio3, resultado) VALUES (?, ?, ?, ?)")
+          $stm = $db-> prepare("INSERT INTO test(opcio1, opcio2, opcio3, resultado) VALUES (?, ?, ?, ?)")
           $stm->bindParam(1, $opcio1);
           $stm->bindParam(2, $opcio2);
           $stm->bindParam(3, $opcio3);
