@@ -25,5 +25,6 @@
 ?>
 <form action="index.php" method="post">
     <p><input type="submit" name= "submit" value="Comienzo"/></p>    
+ </form>
 </body>
 </html>
